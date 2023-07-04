@@ -1,0 +1,29 @@
+{
+    "Class Functions": {
+        "Sample2": {
+            "inheritance": [],
+            "comments": [],
+            "functions": [
+                {
+                    "name": "__init__",
+                    "body": "\ndef __init__(self):\n        pass",
+                    "comments": []
+                },
+                {
+                    "name": "compute_gcd",
+                    "body": "\ndef compute_gcd(self, x, y):\n        while(y):\n            x, y = y, x % y\n\n        return x",
+                    "comments": []
+                },
+                {
+                    "name": "compute_lcm",
+                    "body": "\ndef compute_lcm(self, x, y):\n        lcm = (x*y)//self.compute_gcd(x, y)\n        return lcm",
+                    "comments": []
+                }
+            ]
+        }
+    },
+    "Non Class Functions": {
+        "outside_class_function": "# This is count DigitOne Function\n# It counts the number of occurrences of the numerical digit, 1.\ndef outside_class_function(n):\n    count = 0\n    for i in range(1, n+1):\n            num = str(i)\n            for j in num:\n                if int(j) == 1:\n                    count += 1\n    return count"
+    },
+    "Import Statements": []
+}

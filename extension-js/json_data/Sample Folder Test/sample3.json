@@ -1,0 +1,22 @@
+{
+    "Class Functions": {
+        "BubbleSort": {
+            "inheritance": [],
+            "comments": [],
+            "functions": [
+                {
+                    "name": "__init__",
+                    "body": "\ndef __init__(self):\n        # \"\"\" \n        # BubbleSort Algorithm Implementation \n\n        # arr: Unordered list\n        # output: Return list in ascending order\n        # time complexity: O(n2)\n\n        # Example:\n        # >>> sort = BubbleSort()\n        # >>> sort([4,2,6,5,9,8])\n        # [2,4,5,6,8,9]\n        \n        # \"\"\"\n\n        print(\"Bubble Sort Algorithmm is Initialized\")",
+                    "comments": []
+                },
+                {
+                    "name": "__call__",
+                    "body": "\ndef __call__(self, arr):\n        n = len(arr)\n        for i in range(n):\n            already_sorted = True\n            for j in range(n - i - 1):\n                if arr[j] > arr[j+1]:\n                    arr[j], arr[j+1] = arr[j+1], arr[j]\n\n            if already_sorted:\n                break\n\n        return arr",
+                    "comments": []
+                }
+            ]
+        }
+    },
+    "Non Class Functions": {},
+    "Import Statements": []
+}

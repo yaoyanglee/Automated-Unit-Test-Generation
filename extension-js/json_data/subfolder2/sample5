@@ -1,0 +1,24 @@
+{
+    "Class Functions": {
+        "subfolder2": {
+            "inheritance": [],
+            "comments": [],
+            "functions": [
+                {
+                    "name": "__init__",
+                    "body": "\ndef __init__(self):\n        pass",
+                    "comments": []
+                },
+                {
+                    "name": "sub",
+                    "body": "\ndef sub(self, a, b):\n        return a - b",
+                    "comments": []
+                }
+            ]
+        }
+    },
+    "Non Class Functions": {
+        "sum": "\ndef sum(a, b):\n    return a + b"
+    },
+    "Import Statements": []
+}

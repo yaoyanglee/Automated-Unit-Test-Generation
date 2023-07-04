@@ -1,0 +1,9 @@
+{
+    "Class Functions": {},
+    "Non Class Functions": {
+        "mergeSort": "\ndef mergeSort(self, arr):\n    \"\"\" mergeSort Algorithm Implementation in Python 3\n\n        arr : Unorded list\n        output : Return list in ascending order.\n        time complexity : O(n log2n)\n        Note : O(n log2n) is the best possible worst-case runtime that can be\n        achieved by a sorting algorithm.\n\n        Example :\n        >>> mergeSort([4,2,6,5,9,8])\n        [2, 4, 5, 6, 8, 9]\"\"\"\n\n    if len(arr) < 2:\n        return arr\n\n    midpoint = len(arr) // 2\n\n    return merge(left=mergeSort(arr[:midpoint]),\n                 right=mergeSort(arr[midpoint:]))",
+        "test_mergeSort_1": "\ndef test_mergeSort_1():\n    arr = [4,2,6,5,9,8]\n    print(mergeSort(arr))",
+        "test_mergeSort_2": "\ndef test_mergeSort_2():\n    arr = [4,2,6,5,9,8]\n    print(mergeSort(arr))"
+    },
+    "Import Statements": []
+}
