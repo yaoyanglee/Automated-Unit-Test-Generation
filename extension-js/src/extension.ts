@@ -29,362 +29,323 @@ function replicateFolderStructure(sourceDir:string, destinationDir:string) {
 	// for(const file of files) {
 	// 	const sourcePath = path.join(sourceDir, file.name);
 	// 	const destinationPath = path.join(destinationDir, file.name);
-
-	// 	if(file.isDirectory()) {
-	// 		replicateFolderStructure(sourcePath, destinationPath);
-	// 	}
 	// }
 }
 
 // This function reads all files in the directory. It reads the current and subfolders as well
-function readAllFilesinDirectory(directory: string, testDirectory:string) {
-	vscode.window.withProgress({
-		location: vscode.ProgressLocation.Notification,
-		title: "Generating unit tests",
-		cancellable: true
-	}, (progress: any): any => {
-		fs.readdir(directory, (err, files) => {
-			if(err) {
-				console.error(err);
-				return;
-			}
-			let filesLength = files.length;
+async function readAllFilesinDirectory(directory: string, testDirectory:string) {
+	const entries = await fs.promises.readdir(directory, {withFileTypes:true});
+	const fileNames: string [] = [];
+		for (const file of entries) {
+			const filePath = path.join(directory, file.name);
+			const stats = fs.statSync(filePath);
 
-			files.forEach((file) => {
-				const filePath = path.join(directory, file);
-				fs.stat(filePath, (err, stats) => {
-					if(err) {
-						console.error(err);
-						return;
-					}
+			if(stats.isFile()) {
+				fileNames.push(file.name);		
+			}
+		}
+	const totalFiles = fileNames.length;
+	let processedFiles = 0;
 	
-					if(stats.isDirectory()) {
-						readAllFilesinDirectory(filePath, testDirectory);
+	const folderPath = path.basename(directory);
+	await vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: `Generating unit tests for "${folderPath}"`,
+		cancellable: true
+	}, async (progress:any): Promise<void> => {
+		const processFile = async (entry: fs.Dirent): Promise<void> => {
+			const file = entry.name;
+			const filePath = path.join(directory, file);
+			const stats = await fs.promises.stat(filePath);
+
+			if(stats.isDirectory()) {
+				readAllFilesinDirectory(filePath, testDirectory);
+			}
+			else {
+				const data = await fs.promises.readFile(filePath, 'utf-8');
+				const importStatement = path.join(directory, file);
+				const relativeImportPath = path.relative(testDirectory, importStatement);
+				const fileName = file.split('.')[0];
+				const testFilePath = `${testDirectory}/test_${fileName}.py` 
+
+				try{
+					const response = await axios.post("http://127.0.0.1:8000/directory_test", {file_data: data, file_name: file, dir_path: directory, import_path: relativeImportPath}, {headers: {"Content-Type": "application/json"}})
+					
+					const jsonFolderPath = `${testDirectory}/json_data/${response.data[1]}`; 
+
+					if(!fs.existsSync(jsonFolderPath)) {
+						fs.mkdirSync(jsonFolderPath, {recursive: true});
 					}
-					else {
-						fs.readFile(filePath, 'utf-8', (err, data) => {
+
+					fs.writeFileSync(`${jsonFolderPath}/${response.data[2]}.json`, response.data[0]);
+	
+					// Array is structured in classname, function name and prompt
+					const promptArr = response.data[3];
+					
+					console.log(file);
+					for (const element of promptArr) {
+						// Separating the Response from the instruction
+						let promptSplitArr = element[2].split("### Response")
+						let responseStr = promptSplitArr.slice(1)[0].trim().split("###")[0];
+						responseStr = responseStr + "\n\n";
+
+						fs.appendFile(testFilePath,  responseStr, err => {	
 							if(err) {
 								console.error(err);
 								return;
 							}
-							const importStatement = path.join(directory, file);
-							let relativeImportPath = path.relative(testDirectory, importStatement);
-							let fileName = file.split('.')[0];
-							let testFilePath = `${testDirectory}/test_${fileName}.py`
-	
-							// Making a POST request to the server to format the files
-							// Need to add this URL into the config json
-							axios.post("http://127.0.0.1:8000/directory_test", {file_data: data, file_name: file, dir_path: directory, import_path: relativeImportPath}, {headers: {"Content-Type": "application/json"}}).then(function (response) {
-								let parentDirPath = path.dirname(__dirname);
-								let jsonFolderPath = `${testDirectory}/json_data/${response.data[1]}`;
-								let testsFolderPath = `${testDirectory}/${response.data[1]}`;
-	
-								if(!fs.existsSync(jsonFolderPath)) {
-									fs.mkdirSync(jsonFolderPath, {recursive: true});
-								}
-								// if(!fs.existsSync(testsFolderPath)) {
-								// 	fs.mkdirSync(testsFolderPath, {recursive: true});
-								// }	
-								
-								// Writing the JSON object into a file
-								fs.writeFileSync(`${jsonFolderPath}/${response.data[2]}.json`, response.data[0]);
-	
-								// Array is structured in classname, function name and prompt
-								const promptArr = response.data[3];
-								
-								console.log(file);
-								for (const element of promptArr) {
-									// Separating the Response from the instruction
-									let promptSplitArr = element[2].split("### Response")
-									let responseStr = promptSplitArr.slice(1)[0].trim().split("###")[0];
-									responseStr = responseStr + "\n\n";
-	
-									fs.appendFile(testFilePath,  responseStr, err => {	
-										if(err) {
-											console.error(err);
-											return;
-										}
-										console.log('Content appended successfully');
-									});
-								}
-								
-								// Writing the imports to the start of the file
-								let parsedRelativeImport = response.data[4];
-								parsedRelativeImport = `from ${parsedRelativeImport} import *`;
-								fs.readFile(testFilePath, 'utf-8', (err, existingContent) => {
-									if(err) {
-										console.error('An error has occured while reading the file to write the import statements');
-										return;
-									}
-									
-									const updatedContent = parsedRelativeImport + "\n\n" + existingContent;
-	
-									fs.writeFile(testFilePath, updatedContent, (err) => {
-										if(err) {
-											console.error("Error writing the import statements to the file");
-											return;
-										}
-									})
-								})
-								progress.report({increment: 100, message:`Test for ${file} complete`});
-								// vscode.window.showInformationMessage(`Unit tests for ${response.data[1]} generated`);
-							})
-						})
+							console.log('Content appended successfully');
+						});
 					}
-				})
-			})
-		})
+					
+					// Writing the imports to the start of the file
+					let parsedRelativeImport = response.data[4];
+					parsedRelativeImport = `from ${parsedRelativeImport} import *`;
+
+					const existingContent = await fs.promises.readFile(testFilePath, 'utf-8');
+					const updatedContent = parsedRelativeImport + "\n\n" + existingContent;
+
+					await fs.promises.writeFile(testFilePath, updatedContent);
+					
+				}
+				catch (err) {
+					console.log(err);
+				}
+
+				processedFiles++;
+				const progressPercentage = (processedFiles/totalFiles) * 100;
+				progress.report({increment: progressPercentage, message: `Test for ${file} complete`});
+			}
+		};
+		 
+		for (const entry of entries) {
+			await processFile(entry);
+		}
+
+		if(processedFiles == totalFiles) {
+			progress.report({increment: 100, message: "Process Complete"});
+			const dirName = path.basename(directory);
+			vscode.window.showInformationMessage(`Tests for files in ${dirName} generated`, {modal:true});
+		}		
 	})
 
-	// fs.readdir(directory, (err, files) => {
+	
+	// fs.readdir(directory, async (err, files) => {
 	// 	if(err) {
 	// 		console.error(err);
 	// 		return;
 	// 	}
-
-	// 	files.forEach((file) => {
+		
+	// 	const fileNames: string [] = [];
+	// 	for (const file of files) {
 	// 		const filePath = path.join(directory, file);
-	// 		fs.stat(filePath, (err, stats) => {
-	// 			if(err) {
-	// 				console.error(err);
-	// 				return;
-	// 			}
+	// 		const stats = fs.statSync(filePath);
 
-	// 			if(stats.isDirectory()) {
-	// 				readAllFilesinDirectory(filePath, testDirectory);
-	// 			}
-	// 			else {
-	// 				fs.readFile(filePath, 'utf-8', (err, data) => {
-	// 					if(err) {
-	// 						console.error(err);
-	// 						return;
-	// 					}
-	// 					const importStatement = path.join(directory, file);
-	// 					let relativeImportPath = path.relative(testDirectory, importStatement);
-	// 					let fileName = file.split('.')[0];
-	// 					let testFilePath = `${testDirectory}/test_${fileName}.py`
+	// 		if(stats.isFile()) {
+	// 			fileNames.push(file);		
+	// 		}
+	// 	}
 
-	// 					// Making a POST request to the server to format the files
-	// 					// Need to add this URL into the config json
-	// 					axios.post("http://127.0.0.1:8000/directory_test", {file_data: data, file_name: file, dir_path: directory, import_path: relativeImportPath}, {headers: {"Content-Type": "application/json"}}).then(function (response) {
-	// 						let parentDirPath = path.dirname(__dirname);
-	// 						let jsonFolderPath = `${testDirectory}/json_data/${response.data[1]}`;
-	// 						let testsFolderPath = `${testDirectory}/${response.data[1]}`;
+	// 	let totalLength = fileNames.length;
+	// 	let parentDirName = path.basename(path.dirname(path.join(directory, fileNames[0]))); 
+	// 	console.log(fileNames);
 
-	// 						if(!fs.existsSync(jsonFolderPath)) {
-	// 							fs.mkdirSync(jsonFolderPath, {recursive: true});
+	// 	await vscode.window.withProgress({
+	// 		location: vscode.ProgressLocation.Window,
+	// 		title: `Generating tests for ${parentDirName}`,
+	// 		cancellable: true
+	// 	}, (progress:any):any => {
+	// 		files.forEach((file) => {
+	// 			let processedFiles = 0;
+	// 			progress.report({increment: 0});
+
+	// 			const filePath = path.join(directory, file);
+	// 			fs.stat(filePath, (err, stats) => {
+	// 				if(err) {
+	// 					console.error(err);
+	// 					return;
+	// 				}
+	
+	// 				if(stats.isDirectory()) {
+	// 					readAllFilesinDirectory(filePath, testDirectory);
+	// 				}
+	// 				else {
+	// 					fs.readFile(filePath, 'utf-8', (err, data) => {
+	// 						if(err) {
+	// 							console.error(err);
+	// 							return;
 	// 						}
-	// 						// if(!fs.existsSync(testsFolderPath)) {
-	// 						// 	fs.mkdirSync(testsFolderPath, {recursive: true});
-	// 						// }	
-							
-	// 						// Writing the JSON object into a file
-	// 						fs.writeFileSync(`${jsonFolderPath}/${response.data[2]}.json`, response.data[0]);
-
-	// 						// Array is structured in classname, function name and prompt
-	// 						const promptArr = response.data[3];
-							
-	// 						console.log(file);
-	// 						for (const element of promptArr) {
-	// 							// Separating the Response from the instruction
-	// 							let promptSplitArr = element[2].split("### Response")
-	// 							let responseStr = promptSplitArr.slice(1)[0].trim().split("###")[0];
-	// 							responseStr = responseStr + "\n\n";
-
-	// 							fs.appendFile(testFilePath,  responseStr, err => {	
-	// 								if(err) {
-	// 									console.error(err);
-	// 									return;
-	// 								}
-	// 								console.log('Content appended successfully');
-	// 							});
-	// 						}
-							
-	// 						// Writing the imports to the start of the file
-	// 						let parsedRelativeImport = response.data[4];
-	// 						parsedRelativeImport = `from ${parsedRelativeImport} import *`;
-	// 						fs.readFile(testFilePath, 'utf-8', (err, existingContent) => {
-	// 							if(err) {
-	// 								console.error('An error has occured while reading the file to write the import statements');
-	// 								return;
+	// 						const importStatement = path.join(directory, file);
+	// 						let relativeImportPath = path.relative(testDirectory, importStatement);
+	// 						let fileName = file.split('.')[0];
+	// 						let testFilePath = `${testDirectory}/test_${fileName}.py`
+	
+	// 						// Making a POST request to the server to format the files
+	// 						// Need to add this URL into the config json
+	// 						axios.post("http://127.0.0.1:8000/directory_test", {file_data: data, file_name: file, dir_path: directory, import_path: relativeImportPath}, {headers: {"Content-Type": "application/json"}}).then(function (response) {
+	// 							let parentDirPath = path.dirname(__dirname);
+	// 							let jsonFolderPath = `${testDirectory}/json_data/${response.data[1]}`;
+	// 							let testsFolderPath = `${testDirectory}/${response.data[1]}`;
+	
+	// 							if(!fs.existsSync(jsonFolderPath)) {
+	// 								fs.mkdirSync(jsonFolderPath, {recursive: true});
+	// 							}
+	// 							// if(!fs.existsSync(testsFolderPath)) {
+	// 							// 	fs.mkdirSync(testsFolderPath, {recursive: true});
+	// 							// }	
+								
+	// 							// Writing the JSON object into a file
+	// 							fs.writeFileSync(`${jsonFolderPath}/${response.data[2]}.json`, response.data[0]);
+	
+	// 							// Array is structured in classname, function name and prompt
+	// 							const promptArr = response.data[3];
+								
+	// 							console.log(file);
+	// 							for (const element of promptArr) {
+	// 								// Separating the Response from the instruction
+	// 								let promptSplitArr = element[2].split("### Response")
+	// 								let responseStr = promptSplitArr.slice(1)[0].trim().split("###")[0];
+	// 								responseStr = responseStr + "\n\n";
+	
+	// 								fs.appendFile(testFilePath,  responseStr, err => {	
+	// 									if(err) {
+	// 										console.error(err);
+	// 										return;
+	// 									}
+	// 									console.log('Content appended successfully');
+	// 								});
 	// 							}
 								
-	// 							const updatedContent = parsedRelativeImport + "\n\n" + existingContent;
-
-	// 							fs.writeFile(testFilePath, updatedContent, (err) => {
+	// 							// Writing the imports to the start of the file
+	// 							let parsedRelativeImport = response.data[4];
+	// 							parsedRelativeImport = `from ${parsedRelativeImport} import *`;
+	// 							fs.readFile(testFilePath, 'utf-8', (err, existingContent) => {
 	// 								if(err) {
-	// 									console.error("Error writing the import statements to the file");
+	// 									console.error('An error has occured while reading the file to write the import statements');
 	// 									return;
 	// 								}
+									
+	// 								const updatedContent = parsedRelativeImport + "\n\n" + existingContent;
+	
+	// 								fs.writeFile(testFilePath, updatedContent, (err) => {
+	// 									if(err) {
+	// 										console.error("Error writing the import statements to the file");
+	// 										return;
+	// 									}
+	// 								})
 	// 							})
-	// 						})
 
-	// 						vscode.window.showInformationMessage(`Unit tests for ${response.data[1]} generated`);
+	// 							processedFiles++;
+	// 							progress.report({increment: processedFiles/totalLength *100, message:`Test for ${file} complete`});
+	// 						})
+	// 						console.log("This is just after the post");
 	// 					})
-	// 				})
-	// 			}
+	// 				}
+	// 			})
 	// 		})
-	// 	})
+	// 		// vscode.window.showInformationMessage("Test generation complete", {modal:true});
+	// 	})	
 	// })
 }
 
 async function readFilesInDirectory(directoryPath: string, testDirectory:string) {
 	const entries = fs.readdirSync(directoryPath, {withFileTypes:true});
-	let entryLength = entries.length;
+	const fileNames: string [] = [];
+	for (const file of entries) {
+		const filePath = path.join(directoryPath, file.name);
+		const stats = fs.statSync(filePath);
 
-	vscode.window.withProgress({
+		if(stats.isFile()) {
+			fileNames.push(file.name);		
+		}
+	}
+	let entryLength = fileNames.length;
+	
+	const folderName = path.basename(directoryPath);
+	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
-		title: "Generating unit tests",
-		cancellable: true
-	}, (progress: any): any => {
+		title: `Generating unit tests for "${folderName}"`,
+		cancellable: false
+	}, async (progress: any) => {
 		progress.report({increment: 0});
 
-		entries.forEach((entry) => {
+		for (const entry of entries) {
 			const fullPath = path.join(directoryPath, entry.name);
 			if(entry.isFile()) {
-				fs.readFile(fullPath, 'utf-8', (err, data) => {
-					if(err) {
-						vscode.window.showErrorMessage(`Failed to read file: ${err}`);
-						return;
-					}
-	
+				try {
+					const data = await fs.promises.readFile(fullPath, "utf-8");
+
+					
 					const importStatement = path.join(directoryPath, entry.name)
 					let relativeImportPath = path.relative(testDirectory, importStatement);
 					let fileName = entry.name.split('.')[0];
 					let testFilePath = `${testDirectory}/test_${fileName}.py`
 	
 					// This is the logic where we pass the info back to the server for parsing the file and running the code body into the models
-					axios.post("http://127.0.0.1:8000/directory_test", {file_data: data, file_name: entry.name, dir_path: directoryPath, import_path: relativeImportPath}, {headers: {"Content-Type": "application/json"}}).then(function (response) {
-						// Creating a folder for storing the json object returned from the server
-						let parentDirPath = path.dirname(__dirname);
-						let jsonFolderPath = `${testDirectory}/json_data/${response.data[1]}`;
-						let testsFolderPath = `${parentDirPath}/generated_tests/${response.data[response.data[1]]}`;
-			
-						if(!fs.existsSync(jsonFolderPath)) {
-							fs.mkdirSync(jsonFolderPath, {recursive: true});
-						}
-						// if(!fs.existsSync(testsFolderPath)) {
-						// 	fs.mkdirSync(testsFolderPath, {recursive: true});
-						// }	
-	
-						// Writing the parsed JSON object into a file within the correct folder
-						// const jsonString = JSON.stringify(response.data[0], null, 2);
-						fs.writeFileSync(`${jsonFolderPath}/${response.data[2]}`, response.data[0]);
-	
-						const promptArr = response.data[3]
-	
-						for (const element of promptArr) {
-							// Separating the Response from the instruction
-							let promptSplitArr = element[2].split("### Response")
-							let responseStr = promptSplitArr.slice(1)[0].trim().split("###")[0];
-							responseStr = responseStr + "\n\n";
-	
-							fs.appendFile(testFilePath,  responseStr, err => {	
-								if(err) {
-									console.error(err);
-									return;
-								}
-								console.log('Content appended successfully');
-							});
-						}
+					// let response = await axios.post("http://127.0.0.1:8000/directory_test", {file_data: data, file_name: entry.name, dir_path: directoryPath, import_path: relativeImportPath}, {headers: {"Content-Type": "application/json"}}).then(function (response) {
 						
-						// Writing the imports to the start of the file
-						let parsedRelativeImport = response.data[4];
-						parsedRelativeImport = `from ${parsedRelativeImport} import *`;
-						fs.readFile(testFilePath, 'utf-8', (err, existingContent) => {
+					// })
+
+					let response = await axios.post("http://127.0.0.1:8000/directory_test", {file_data: data, file_name: entry.name, dir_path: directoryPath, import_path: relativeImportPath}, {headers: {"Content-Type": "application/json"}})
+
+					// Creating a folder for storing the json object returned from the server
+					let parentDirPath = path.dirname(__dirname);
+					let jsonFolderPath = `${testDirectory}/json_data/${response.data[1]}`;
+					let testsFolderPath = `${parentDirPath}/generated_tests/${response.data[response.data[1]]}`;
+		
+					if(!fs.existsSync(jsonFolderPath)) {
+						fs.mkdirSync(jsonFolderPath, {recursive: true});
+					}	
+
+					// Writing the parsed JSON object into a file within the correct folder
+					// const jsonString = JSON.stringify(response.data[0], null, 2);
+					fs.writeFileSync(`${jsonFolderPath}/${response.data[2]}`, response.data[0]);
+
+					const promptArr = response.data[3]
+
+					for (const element of promptArr) {
+						// Separating the Response from the instruction
+						let promptSplitArr = element[2].split("### Response")
+						let responseStr = promptSplitArr.slice(1)[0].trim().split("###")[0];
+						responseStr = responseStr + "\n\n";
+
+						fs.appendFile(testFilePath,  responseStr, err => {	
 							if(err) {
-								console.error('An error has occured while reading the file to write the import statements');
+								console.error(err);
 								return;
 							}
-							
-							const updatedContent = parsedRelativeImport + "\n\n" + existingContent;
-	
-							fs.writeFile(testFilePath, updatedContent, (err) => {
-								if(err) {
-									console.error("Error writing the import statements to the file");
-									return;
-								}
-							})
-						})
-						progress.report({increment: 1/entryLength * 100, message:`Test for ${entry.name} complete`});
-					})
-				});
-			} 
-		})
-	})
-
-	// entries.forEach((entry) => {
-	// 	const fullPath = path.join(directoryPath, entry.name);
-	// 	if(entry.isFile()) {
-	// 		fs.readFile(fullPath, 'utf-8', (err, data) => {
-	// 			if(err) {
-	// 				vscode.window.showErrorMessage(`Failed to read file: ${err}`);
-	// 				return;
-	// 			}
-
-	// 			const importStatement = path.join(directoryPath, entry.name)
-	// 			let relativeImportPath = path.relative(testDirectory, importStatement);
-	// 			let fileName = entry.name.split('.')[0];
-	// 			let testFilePath = `${testDirectory}/test_${fileName}.py`
-
-	// 			// This is the logic where we pass the info back to the server for parsing the file and running the code body into the models
-	// 			axios.post("http://127.0.0.1:8000/directory_test", {file_data: data, file_name: entry.name, dir_path: directoryPath, import_path: relativeImportPath}, {headers: {"Content-Type": "application/json"}}).then(function (response) {
-	// 				// Creating a folder for storing the json object returned from the server
-	// 				let parentDirPath = path.dirname(__dirname);
-	// 				let jsonFolderPath = `${testDirectory}/json_data/${response.data[1]}`;
-	// 				let testsFolderPath = `${parentDirPath}/generated_tests/${response.data[response.data[1]]}`;
-		
-	// 				if(!fs.existsSync(jsonFolderPath)) {
-	// 					fs.mkdirSync(jsonFolderPath, {recursive: true});
-	// 				}
-	// 				// if(!fs.existsSync(testsFolderPath)) {
-	// 				// 	fs.mkdirSync(testsFolderPath, {recursive: true});
-	// 				// }	
-
-	// 				// Writing the parsed JSON object into a file within the correct folder
-	// 				// const jsonString = JSON.stringify(response.data[0], null, 2);
-	// 				fs.writeFileSync(`${jsonFolderPath}/${response.data[2]}`, response.data[0]);
-
-	// 				const promptArr = response.data[3]
-
-	// 				for (const element of promptArr) {
-	// 					// Separating the Response from the instruction
-	// 					let promptSplitArr = element[2].split("### Response")
-	// 					let responseStr = promptSplitArr.slice(1)[0].trim().split("###")[0];
-	// 					responseStr = responseStr + "\n\n";
-
-	// 					fs.appendFile(testFilePath,  responseStr, err => {	
-	// 						if(err) {
-	// 							console.error(err);
-	// 							return;
-	// 						}
-	// 						console.log('Content appended successfully');
-	// 					});
-	// 				}
+							console.log('Content appended successfully');
+						});
+					}
 					
-	// 				// Writing the imports to the start of the file
-	// 				let parsedRelativeImport = response.data[4];
-	// 				parsedRelativeImport = `from ${parsedRelativeImport} import *`;
-	// 				fs.readFile(testFilePath, 'utf-8', (err, existingContent) => {
-	// 					if(err) {
-	// 						console.error('An error has occured while reading the file to write the import statements');
-	// 						return;
-	// 					}
+					// Writing the imports to the start of the file
+					let parsedRelativeImport = response.data[4];
+					parsedRelativeImport = `from ${parsedRelativeImport} import *`;
+					fs.readFile(testFilePath, 'utf-8', (err, existingContent) => {
+						if(err) {
+							console.error('An error has occured while reading the file to write the import statements');
+							return;
+						}
 						
-	// 					const updatedContent = parsedRelativeImport + "\n\n" + existingContent;
+						const updatedContent = parsedRelativeImport + "\n\n" + existingContent;
 
-	// 					fs.writeFile(testFilePath, updatedContent, (err) => {
-	// 						if(err) {
-	// 							console.error("Error writing the import statements to the file");
-	// 							return;
-	// 						}
-	// 					})
-	// 				})
-					
-	// 			})
-	// 		});
-	// 	} 
-	// })
+						fs.writeFile(testFilePath, updatedContent, (err) => {
+							if(err) {
+								console.error("Error writing the import statements to the file");
+								return;
+							}
+						})
+					})
+					progress.report({increment: 1/entryLength * 100, message:`Test for ${entry.name} complete`});
+				}
+				catch (err) {
+					console.log(err);
+				}
+			}
+		}
+
+		vscode.window.showInformationMessage("Test generation complete", {modal: true});
+	})
 }
 
 // This method is called when your extension is activated
@@ -401,51 +362,17 @@ export function activate(context: vscode.ExtensionContext) {
 	})
 
 	// This command is for generating unit tests for all sub folders within the current folder
-	let allDirsTest = vscode.commands.registerCommand('automatic-code-documentation.allDirsTest', (uri: vscode.Uri) => {
+	let allDirsTest = vscode.commands.registerCommand('automatic-code-documentation.allDirsTest', async (uri: vscode.Uri) => {
 		const currentFolderPath = uri.fsPath;
 		// Setting the root directory and test directories
 		const rootDir = getRootDirectory()
 		console.log(rootDir);
 		const testDir = `${rootDir}/Tests`;
+		const folderName = path.basename(currentFolderPath);
 
 		// Replicating the folder structure first
 		replicateFolderStructure(currentFolderPath, testDir);
-			
-		// Calling the function to read files
 		readAllFilesinDirectory(currentFolderPath, testDir);
-
-		// vscode.window.withProgress({
-		// 	location: vscode.ProgressLocation.Window,
-		// 	title: `Generating unit tests for ${currentFolderPath}`,
-		// 	cancellable: true
-		// }, (progress, token) => {
-		// 	token.onCancellationRequested(() => {
-		// 		console.log("User canceled the test generation");
-		// 	})
-
-			
-
-		// 	const p = new Promise<void>(resolve => {
-		// 		resolve();
-		// 	})
-			
-		// 	return p;
-		// })
-
-		// vscode.window.showInformationMessage("Unit tests generating");
-		// const currentFolderPath = uri.fsPath;
-		
-		// // Setting the root directory and test directories
-		// const rootDir = getRootDirectory()
-		// console.log(rootDir);
-		// const testDir = `${rootDir}/Tests`;
-
-		// // Replicating the folder structure first
-		// replicateFolderStructure(currentFolderPath, testDir);
-		// // Calling the function to read files
-		// readAllFilesinDirectory;
-
-		// readAllFilesinDirectory(currentFolderPath, testDir);
 	})
 
 	// This function aims to retrieve all files in the current directory of the active file
@@ -459,24 +386,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 		replicateFolderStructure(currentFolderPath, testDir);
 		readFilesInDirectory(currentFolderPath, testDir);
-
-		// vscode.window.withProgress({
-		// 	location: vscode.ProgressLocation.Notification,
-		// 	title: "Generating unit tests for the current directory",
-		// }, async (progress, token) => {
-		// 	token.onCancellationRequested(() => {
-		// 		console.log("User cancelled the process");
-		// 	})
-		// 	// Creating the parent test folder
-		// 	replicateFolderStructure(currentFolderPath, testDir);
-
-		// 	const p = new Promise<void>(async resolve => {
-		// 		await readFilesInDirectory(currentFolderPath, testDir);
-		// 		resolve();
-		// 	})
-
-		// 	return p;
-		// })
 	});
 
 
@@ -508,7 +417,7 @@ export function activate(context: vscode.ExtensionContext) {
 		axios.post("http://127.0.0.1:8	000", {code: code, fileData: fileData}, {headers: {"Content-Type": "application/json"}}).then(function(response) {
 			try {
 				// Specifying the unit test parent folder
-				const test_dir = '/home/lyaoyang/Desktop/VS-Extension/extension-js/pytest-test-folder';
+				const test_dir = '/home/lyaoyang/Desktop/VS-Extension/extension-js/pytest-test-folder'
 
 				// Writing to file
 				fs.writeFileSync(path.join(test_dir, './test.py'), response.data, {flag:'w'});
