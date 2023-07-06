@@ -427,8 +427,8 @@ function activate(context) {
                 // Specifying the unit test parent folder
                 const test_dir = '/home/lyaoyang/Desktop/VS-Extension/extension-js/pytest-test-folder';
                 // Writing to file
-                writeFileSync(join(test_dir, './test.py'), response.data, { flag: 'w' });
-                const content = readFileSync(join(test_dir, './test.py'), 'utf-8');
+                fs.writeFileSync(path.join(test_dir, './test.py'), response.data, { flag: 'w' });
+                const content = fs.readFileSync(path.join(test_dir, './test.py'), 'utf-8');
                 console.log(content);
                 vscode.window.showInformationMessage("Unit Tests Generated");
             }

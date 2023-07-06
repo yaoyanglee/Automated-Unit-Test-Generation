@@ -1,6 +1,6 @@
 # automatic-code-documentation README
 
-This is the README for your extension "automatic-code-documentation". After writing up a brief description, we recommend including the following sections.
+This is an extension that generates unit tests for code using Large Language Models.
 
 ## Features
 
