@@ -3,10 +3,14 @@ This repo contains the code to generate unit tests with open source LLMs. Curren
 
 # Installation
 
-**Ensure that NodeJS is installed on your computer by running**
+**Check Node and NPM versions with**
 ```
 node -v
+npm -v
 ```
+NodeJS version at the time of development is in `v18.16.0` and NPM version is in `9.5.1`
+
+
 
 0. (Optional) Creating a virtual environment
 
@@ -59,7 +63,7 @@ node -v
 
     Then enter the folder and download the wheels from `requirments.txt` 
     ```
-    pip install -r requirements.txt
+    pip install -r requirments.txt --find-links="wheels_folder_name" --no-index --no-deps
     ```
 
     If there are any missing modules, repeat the steps above but pip install the specific modules instead.
@@ -111,3 +115,24 @@ Go to the folder containing your extension and run
 vsce package
 ```
 This will generate a `.VSIX` file. You can now right click on the `.VSIX` file to install the extension anywhere.
+
+# Using the application
+
+## Using the CLI tool
+The CLI tool has a 3 options.
+
+1. **--dir_under_test** \
+    This is a **required argument**, and it specifies the path to the root directory that we want to test. The input has to be the **absolute path to the directory**. 
+
+2. **--tests_dir** \
+    This is a **required argument** and it specifies the path to the output folder. The input has to be the **absolute path to the directory**. 
+
+3. **--whole_dir** \
+    This is an **optional argument**. This informs the CLI tool whether or not to recursively look through the directory under test to generate tests for files within nested subfolders. 
+
+## Using the VS Code extension
+Below is an example of the extension. Given a working directory which you are currently developing in, you have the option to only test files within the current directory or to test files within nested directories.
+
+![Extension options](./Assets/extension.png "Extension options")
+
+The test cases will be generated in the `Tests/` folder. 
