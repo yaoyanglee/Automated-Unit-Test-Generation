@@ -3,7 +3,7 @@ This repo contains the code to generate unit tests with open source LLMs. Curren
 
 # Installation
 
-**Ensure that NodeJS is installed on your computer by running **
+**Ensure that NodeJS is installed on your computer by running**
 ```
 node -v
 ```
