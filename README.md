@@ -49,14 +49,38 @@ cd wheels_folder_name
 pip download -r requirements.txt
 ```
 
-The wheels are now downloaded and you can install the requirements in an offline environment. Transfer the 
+The wheels are now downloaded and you can install the requirements in an offline environment. Transfer the wheels folder to your offline machine.
 
 Then enter the folder and download the wheels from `requirments.txt` 
 ```
 pip install -r requirements.txt
 ```
 
+If there are any missing modules, repeat the steps above but pip install the specific modules instead.
 
 2. Installing models from HuggingFace
 
-All models used are the pretrained models taken from HuggingFace. Simple install them to a directory of choice on the local device for usage offline. 
+All models used are the pretrained models taken from HuggingFace. Install them to a directory of choice on the local device for usage offline. 
+
+In `config,ini` specify the path to the folder that the respective models are stored in. 
+
+([CodeGen](https://huggingface.co/docs/transformers/model_doc/codegen))
+```
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen-2B-mono").save_pretrained(*path_to_model*)
+```
+
+([StarCoder](https://huggingface.co/bigcode/starcoder))
+```
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained("bigcode/starcoder").save_pretrained(*path_to_model*)
+```
+
+([Replit-CodeInstruct](https://huggingface.co/teknium/Replit-v2-CodeInstruct-3B))
+
+Follow the link above to HuggingFace repo. From there, navigate to the *Files and Versions* section, and download all the files there excluding `.gitatttrbutes` and `README.md`. 
+
+You might have to copy the folder and paste it into the same directory as the server file, if you get a HuggingFace error. Even after specifying the path to the Replit-CodeInstrct folder. 
+
