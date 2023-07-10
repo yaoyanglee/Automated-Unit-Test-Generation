@@ -134,11 +134,9 @@ The CLI tool has a 3 options.
 Below is an example of the extension. Given a working directory which you are currently developing in, you have the option to only test files within the current directory or to test files within nested directories.
 
 <p float="left">
-    <img src="./Assets/extension.png">
-    <img src="./Assets/extension.png">
+    <img src="./Assets/extension.png" width="49%">
+    <img src="./Assets/extension.png" width="49%>
 </p>
-
-This is some random text
 
 ![Extension options](./Assets/extension.png "Extension options")
 
