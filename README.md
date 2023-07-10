@@ -114,7 +114,7 @@ Go to the folder containing your extension and run
 ```
 vsce package
 ```
-This will generate a `.VSIX` file. You can now right click on the `.VSIX` file to install the extension anywhere.
+This will generate a `.VSIX` file. Right click on the `.VSIX` file and select the install option to install the extension anywhere.
 
 # Using the application
 
@@ -134,10 +134,7 @@ The CLI tool has a 3 options.
 Below is an example of the extension. Given a working directory which you are currently developing in, you have the option to only test files within the current directory or to test files within nested directories.
 
 <p float="left">
-    <img src="./Assets/extension.png" width="49%">
-    <img src="./Assets/extension.png" width="49%>
+    <img src="./Assets/extension.png" width="99%">
 </p>
-
-![Extension options](./Assets/extension.png "Extension options")
 
 The test cases will be generated in the `Tests/` folder. 
