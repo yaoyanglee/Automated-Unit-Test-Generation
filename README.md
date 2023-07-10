@@ -27,36 +27,36 @@ your_environment_name\Scripts\activate
 
 1. Installing requirements
 
-**Working in an online environment**
+    **Working in an online environment**
 
-All requirements for this repo are found in the `requirements.txt` file. Install them with
-```
-pip install -r requirements.txt
-```
+    All requirements for this repo are found in the `requirements.txt` file. Install them with
+    ```
+    pip install -r requirements.txt
+    ```
 
-**Working in an offline environment**
+    **Working in an offline environment**
 
-For working with the requirements offline, you can install the wheels into a directory of choice. Before installing them in the offline environment. Move the `requirements.txt` folder into the folder for the wheels before downloading the wheels. 
+    For working with the requirements offline, you can install the wheels into a directory of choice. Before installing them in the offline environment. Move the `requirements.txt` folder into the folder for the wheels before downloading the wheels. 
 
-```
-mkdir wheels_folder_name
-```
+    ```
+    mkdir wheels_folder_name
+    ```
 
-Enter the wheels folder and install the wheels from `requirements.txt`
+    Enter the wheels folder and install the wheels from `requirements.txt`
 
-```
-cd wheels_folder_name
-pip download -r requirements.txt
-```
+    ```
+    cd wheels_folder_name
+    pip download -r requirements.txt
+    ```
 
-The wheels are now downloaded and you can install the requirements in an offline environment. Transfer the wheels folder to your offline machine.
+    The wheels are now downloaded and you can install the requirements in an offline environment. Transfer the wheels folder to your offline machine.
 
-Then enter the folder and download the wheels from `requirments.txt` 
-```
-pip install -r requirements.txt
-```
+    Then enter the folder and download the wheels from `requirments.txt` 
+    ```
+    pip install -r requirements.txt
+    ```
 
-If there are any missing modules, repeat the steps above but pip install the specific modules instead.
+    If there are any missing modules, repeat the steps above but pip install the specific modules instead.
 
 2. Installing models from HuggingFace
 
@@ -84,3 +84,6 @@ Follow the link above to HuggingFace repo. From there, navigate to the *Files an
 
 You might have to copy the folder and paste it into the same directory as the server file, if you get a HuggingFace error. Even after specifying the path to the Replit-CodeInstrct folder. 
 
+# Running the application
+
+# Possible improveme
