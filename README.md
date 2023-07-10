@@ -62,20 +62,20 @@ If there are any missing modules, repeat the steps above but pip install the spe
 
 All models used are the pretrained models taken from HuggingFace. Install them to a directory of choice on the local device for usage offline. 
 
-In `config,ini` specify the path to the folder that the respective models are stored in. 
+In `config.ini` specify the path to the folder that the respective models are stored in. 
 
 ([CodeGen](https://huggingface.co/docs/transformers/model_doc/codegen))
 ```
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen-2B-mono").save_pretrained(*path_to_model*)
+model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen-2B-mono").save_pretrained(path_to_model)
 ```
 
 ([StarCoder](https://huggingface.co/bigcode/starcoder))
 ```
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model = AutoModelForCausalLM.from_pretrained("bigcode/starcoder").save_pretrained(*path_to_model*)
+model = AutoModelForCausalLM.from_pretrained("bigcode/starcoder").save_pretrained(path_to_model)
 ```
 
 ([Replit-CodeInstruct](https://huggingface.co/teknium/Replit-v2-CodeInstruct-3B))
