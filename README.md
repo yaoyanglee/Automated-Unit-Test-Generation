@@ -138,6 +138,8 @@ Below is an example of the extension. Given a working directory which you are cu
     <img src="./Assets/extension.png">
 </p>
 
+This is some random text
+
 ![Extension options](./Assets/extension.png "Extension options")
 
 The test cases will be generated in the `Tests/` folder. 
