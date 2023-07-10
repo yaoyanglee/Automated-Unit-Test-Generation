@@ -2,6 +2,11 @@
 This repo contains the code to generate unit tests with open source LLMs. Currently it supports CodeGen and replit-CodeInstruct. StarCoder is supported but it requires a larger amount of GPU RAM for usability.
 
 # Installation
+
+## Installing NodeJS
+
+
+## Installing Python Packages
 0. (Optional) Creating a virtual environment
 
     You are advised to work with the repo in a virtual environment, as some modules might return errors. I used virtualenv for creating and managing virtual environments, but you can use any other libraries.
@@ -86,10 +91,22 @@ This repo contains the code to generate unit tests with open source LLMs. Curren
 
 # Running the application
 
+## Starting the server
 Activate the virtual environment before starting the server. Navigate to `server-model-py` and run
 ```
 python server.py
 ```
-The server will initialize the model and its tokenizer, before listening for requests. 
+The server will initialize the model and its tokenizer, before listening for requests. The server is now ready to receive calls to it from the extension.
 
+## Installing the VS Code extension
+Ensure that you have node installed on your machine by running
+```
+node -v
+```
+A version number `v18.16.0` should be returned. If not check your npm installation.
 
+Go to the folder containing your extension and run 
+```
+vsce package
+```
+This will generate a `.VSIX` file. You can now right click on the `.VSIX` file to install the extension anywhere.
