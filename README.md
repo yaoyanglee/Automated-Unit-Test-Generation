@@ -3,10 +3,11 @@ This repo contains the code to generate unit tests with open source LLMs. Curren
 
 # Installation
 
-## Installing NodeJS
+**Ensure that NodeJS is installed on your computer by running **
+```
+node -v
+```
 
-
-## Installing Python Packages
 0. (Optional) Creating a virtual environment
 
     You are advised to work with the repo in a virtual environment, as some modules might return errors. I used virtualenv for creating and managing virtual environments, but you can use any other libraries.
