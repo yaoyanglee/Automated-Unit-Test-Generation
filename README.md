@@ -4,7 +4,7 @@ This repo contains the code to generate unit tests with open source LLMs. Curren
 # Installation
 0. (Optional) Creating a virtual environment
 
-    You are advised to work with the repo in a virtual environment, as some modules might return errors. I used virutalenv for creating and managing virtual environments, but you can use any other libraries.
+    You are advised to work with the repo in a virtual environment, as some modules might return errors. I used virtualenv for creating and managing virtual environments, but you can use any other libraries.
 
     ```
     pip install virtualenv
@@ -86,4 +86,10 @@ This repo contains the code to generate unit tests with open source LLMs. Curren
 
 # Running the application
 
-# Possible improveme
+Activate the virtual environment before starting the server. Navigate to `server-model-py` and run
+```
+python server.py
+```
+The server will initialize the model and its tokenizer, before listening for requests. 
+
+
