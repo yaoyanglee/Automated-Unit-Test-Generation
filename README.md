@@ -15,6 +15,7 @@ virtualenv your_environment_name
 ```
 
 Activate the environment
+
 (Linux)
 ```
 source your_environment_name/bin/activate
@@ -23,7 +24,7 @@ source your_environment_name/bin/activate
 (Windows)
 ```
 your_environment_name\Scripts\activate
-```
+``` 
 
 1. Installing requirements
 
