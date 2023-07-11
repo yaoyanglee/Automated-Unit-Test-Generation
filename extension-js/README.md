@@ -1,71 +1,32 @@
-# automatic-code-documentation README
+# Extension Documentation
 
-This is an extension that generates unit tests for code using Large Language Models.
+## Helpers
 
-## Features
+### getRootDirectory()
+This function retrieves the root folder of the current workspace. In essence, the parent folder of all current folders in the workspace. 
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+This used for determining the absolute file path when writing the import paths to the files containing the functions under test.
 
-For example if there is an image subfolder under your extension project workspace:
+### replicateFolderStructure()
+This creates the folder structure for storing the generated tests. Uncommenting the code will make the program replicate the folder structure of the directory under test, and the test files will be stored in the same hierarchy as in the directory under test.
 
-\!\[feature X\]\(images/feature-x.png\)
+## Main Functions
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### readAllFilesinDirectory()
+#### Inputs
+directory (str): The path to the directory under test. \
+testDirectory (str): The path to where the user wants to generate the `Tests\` folder.
 
-## Requirements
+<!-- Add hyperlink to the server page -->
+This function reads all files and folders in the directory under test. For each file, it would extract its text and pass it to the server for parsing and test generation. For each folder, the function would recursively enter the folder to perform the same operation. 
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+It uses the VSCode Extension APIs' [withProgress](https://code.visualstudio.com/api/references/vscode-api) function to track the test generation status of each folder and subfolder. An information message modal will be shown when the tests for each folder/subfolder is complete.
 
-## Extension Settings
+### readFilesinDirectory()
+#### Inputs
+directory (str): The path to the directory under test. \
+testDirectory (str): The path to where the user wants to generate the `Tests\` folder.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+This function reads all files and folders in the directory under test. For each file, it would extract its text and pass it to the server for parsing and test generation. Any directories within the directory under test will be ignored and only the files will be processed.
 
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+It uses the VSCode Extension APIs' [withProgress](https://code.visualstudio.com/api/references/vscode-api) function to track the test generation status of the directory under test. An information message modal will be shown when the tests for the directory under test is complete.

@@ -1,0 +1,22 @@
+{
+    "Class Functions": {
+        "subfolder2": {
+            "inheritance": [],
+            "comments": [],
+            "functions": [
+                {
+                    "name": "__init__",
+                    "body": "\ndef __init__(self):\n        pass",
+                    "comments": []
+                },
+                {
+                    "name": "div",
+                    "body": "\ndef div(self, a, b):\n        '''\n        Here are some edge cases: \n        1. Divide by zero error: 1/0 will give an error\n        2. 0 divided by 1 should always give 0\n        3. Divsion of positive by negative numbers should return negative numbers\n        4. Divsion of negative by negative numbers should return positive numbers\n        '''\n        return a / b",
+                    "comments": []
+                }
+            ]
+        }
+    },
+    "Non Class Functions": {},
+    "Import Statements": []
+}

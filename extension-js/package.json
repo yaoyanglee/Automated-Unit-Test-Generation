@@ -1,7 +1,7 @@
 {
-  "name": "automatic-code-documentation",
-  "displayName": "Automatic Code Documentation",
-  "description": "Automatically generate code documentation with CodeBERT and LLMs",
+  "name": "automatic-unit-test-generation",
+  "displayName": "Automatic Unit Test generation",
+  "description": "Automatically generate unit tests with open source LLMs such as CodeGen",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.78.0"
@@ -14,45 +14,25 @@
   "contributes": {
     "commands": [
       {
-        "command": "automatic-code-documentation.helloWorld",
-        "title": "Test function"
-      }, 
-      {
-        "command": "automatic-code-documentation.currentDirTest",
+        "command": "automatic-unit-test-generation.currentDirTest",
         "title": "Test current directory"
       },
       {
-        "command": "automatic-code-documentation.allDirsTest",
+        "command": "automatic-unit-test-generation.allDirsTest",
         "title": "Test current and sub directories"
-      },
-      {
-        "command": "automatic-code-documentation.curFileTest",
-        "title": "Test this file"
       }
     ],
     "menus": {
-      "editor/context": [
-        {
-          "when": "editorHasSelection",
-          "command": "automatic-code-documentation.helloWorld",
-          "group": "9_cutcopypaste"
-        }
-      ], 
       "explorer/context": [
         {
-          "command": "automatic-code-documentation.allDirsTest",
+          "command": "automatic-unit-test-generation.allDirsTest",
           "group": "6_copypath",
           "when": "explorerResourceIsFolder"
         },
         {
-          "command": "automatic-code-documentation.currentDirTest",
+          "command": "automatic-unit-test-generation.currentDirTest",
           "group": "6_copypath",
           "when": "explorerResourceIsFolder"
-        }, 
-        {
-          "command": "automatic-code-documentation.curFileTest",
-          "group": "6_copypath",
-          "when": "resourceLangId == python"
         }
       ]
     }

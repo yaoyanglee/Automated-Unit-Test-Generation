@@ -1,0 +1,22 @@
+{
+    "Class Functions": {
+        "subfolder2": {
+            "inheritance": [],
+            "comments": [],
+            "functions": [
+                {
+                    "name": "__init__",
+                    "body": "\ndef __init__(self):\n        pass",
+                    "comments": []
+                },
+                {
+                    "name": "sub",
+                    "body": "\ndef sub(self, a, b):\n        '''\n        Here are some edge cases: \n        1. Subtraction of 2 negative numbers\n        2. Subtraction of 1 negative and 1 postve number\n        3. Subtraction of 0 with a positive or negative number\n        '''\n        return a - b",
+                    "comments": []
+                }
+            ]
+        }
+    },
+    "Non Class Functions": {},
+    "Import Statements": []
+}

@@ -1,0 +1,29 @@
+{
+    "Class Functions": {
+        "Sample1": {
+            "inheritance": [],
+            "comments": [],
+            "functions": [
+                {
+                    "name": "__init__",
+                    "body": "\ndef __init__(self):\n        pass",
+                    "comments": []
+                },
+                {
+                    "name": "add_without_op",
+                    "body": "\ndef add_without_op(self, a, b):\n        while b != 0:\n            carry = a & b\n            a = a ^ b\n            b = carry << 1\n    \n        return a",
+                    "comments": []
+                },
+                {
+                    "name": "conversion",
+                    "body": "# This is conversion and how conversion is performed\ndef conversion(self, value, base):\n        data = []\n\n        while value >= base:\n            data.append(int(value % base))\n            value = int(value / base)\n        \n        data.append(value)\n        data.reverse()\n        for i in range(0, len(data)):\n            if data[i] > 9:\n                temp = data[i] - 10\n                data.remove(data[i])\n                temp += 65\n        \n        return data",
+                    "comments": [
+                        "# This is conversion and how conversion is performed"
+                    ]
+                }
+            ]
+        }
+    },
+    "Non Class Functions": {},
+    "Import Statements": []
+}
