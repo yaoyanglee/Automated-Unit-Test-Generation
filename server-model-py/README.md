@@ -32,7 +32,7 @@ class Test_function_name:
 
 ## ModelClass
 
-### **init**
+### ****init****
 
 This function takes the model path, device, which is `torch.to('CUDA')`, memory map for inferencing on multiple GPUs amd model_type.
 
