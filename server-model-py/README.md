@@ -30,22 +30,6 @@ class Test_function_name:
         # Code
 ```
 
-## ModelClass
-
-### **\_\_init\_\_**
-
-This function takes the model path, device, which is `torch.to('CUDA')`, memory map for inferencing on multiple GPUs amd model_type.
-
-It then proceeds to initialize the model when it is called by the server.
-
-## importFormatter
-
-## file_post_processing
-
-## directory_generate_test
-
-## Server
-
 ## Helpers
 
 ### FunctionVisitor
@@ -86,3 +70,33 @@ The prompt for each function is written into an array
 ```
 
 This array is then passed into a larger array for a loop based code generation.
+
+## ModelClass
+
+### **\_\_init\_\_**
+
+This function takes the model path, device, which is `torch.to('CUDA')`, memory map for inferencing on multiple GPUs amd model_type.
+
+It then proceeds to initialize the model when it is called by the server.
+
+## importFormatter
+
+This function is mainly used to extract the import statements and function names from the source code string.
+
+It reads the source code string line by line and extracts the import statements through regex. Additionally, finds all function defintions and extracts the function name and stores them in an array,
+
+## file_post_processing
+
+This function contains 3 functions used locally.
+
+`get_lines_with_syntax_error` uses the `AST` module to parse the code, and if there are `SyntaxError`, the lines with the `SyntaxError` will be returned.
+
+`remove_code_after_first_def` removes the trailing function in the generated code. It reads the generated code from the end of the generated code and searches for the first function defintion and removes it. This is done in order to completely remove faulty code at the end of the file.
+
+`remove_lines_from_code` takes an array of code strings and removes code from the generated code that correspond to each element in the array. The input is usually the array returned from `get_lines_with_syntax_error`.
+
+## directory_generate_test
+
+Here the prompt array is passed into the function with the name of the current folder under test. For each entry in the prompt array, the prompt is passed into the respective models to generate unit tests. The generated tests are then post processed and the processed files are written stored on the server side.
+
+## Server
