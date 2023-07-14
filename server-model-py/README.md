@@ -101,6 +101,9 @@ Here the prompt array is passed into the function with the name of the current f
 
 ## Server
 
+<!-- Add inputs to function -->
+<!-- Add what variables unpack and the import variable created -->
+
 The main function in this file is file_parser. The function unpacks the request body in the `POST` request.
 
 This function mainly converts the source code string into a JSON file using `json_file_writer` from `FileParser`. Then the prompts are formatted using the `json_to_prompt` function, and a prompt array is constructed. Then the prompt array is passed into the `directory_generate_test` function.
