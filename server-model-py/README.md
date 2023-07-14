@@ -100,3 +100,7 @@ This function contains 3 functions used locally.
 Here the prompt array is passed into the function with the name of the current folder under test. For each entry in the prompt array, the prompt is passed into the respective models to generate unit tests. The generated tests are then post processed and the processed files are written stored on the server side.
 
 ## Server
+
+The main function in this file is file_parser. The function unpacks the request body in the `POST` request.
+
+This function mainly converts the source code string into a JSON file using `json_file_writer` from `FileParser`. Then the prompts are formatted using the `json_to_prompt` function, and a prompt array is constructed. Then the prompt array is passed into the `directory_generate_test` function.
