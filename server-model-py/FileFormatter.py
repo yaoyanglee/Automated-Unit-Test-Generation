@@ -93,9 +93,18 @@ class FunctionVisitor(ast.NodeVisitor):
 
         self.generic_visit(node)
 
+    # def visit_Import(self, node):
+    #     for alias in node.names:
+    #         self.import_statements.append(f"import {alias.name}")
+
     def visit_Import(self, node):
         for alias in node.names:
-            self.import_statements.append(f"import {alias.name}")
+            import_name = alias.name
+            import_as = alias.asname or import_name
+            import_statement = f"import {import_name}"
+            if import_as != import_name:
+                import_statement += f" as {import_as}"
+            self.import_statements.append(import_statement)
 
     def visit_ImportFrom(self, node):
         module_name = node.module if node.module else ""
